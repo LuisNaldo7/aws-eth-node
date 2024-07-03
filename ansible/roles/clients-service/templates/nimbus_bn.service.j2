@@ -1,0 +1,13 @@
+[Unit]
+Description=Nimbus Ethereum Consensus Client
+
+[Service]
+Type=simple
+User={{ service_user }}
+ExecStart={{ nimbus_binary_path }} \
+  --network={{ eth_network }} \
+  --data-dir=/home/ubuntu/nimbus
+Restart=always
+
+[Install]
+WantedBy=default.target

@@ -53,5 +53,5 @@ _Switch to directory `/ansible`._
 1. Rollout clients
 
    ```bash
-   ansible-playbook -i hosts.ini install_nginx.yml
+   ansible-playbook -i inventory.yml playbooks/setup-node.yml
    ```

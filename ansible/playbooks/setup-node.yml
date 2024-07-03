@@ -1,0 +1,52 @@
+---
+- name: Setup Node environment
+  hosts: nodes
+  become: true
+
+  vars:
+    
+    # service
+    service_user: ubuntu
+    # service_group: mygroup
+    service_name_nethermind: nethermind
+    service_name_nimbus: nimbus_bn
+
+    eth_network: holesky
+    jwt_path: /jwt
+    
+
+    # nethermind
+    nethermind_binary_path: /usr/local/bin/nethermind
+    nethermind_release: 1.27.0-220b5b85-linux-x64
+    nethermind_enable_rpc: "true"
+    nethermind_rpc_modules: "eth,net"
+
+    # nimbus
+    nimbus_binary_path: /usr/local/bin/nimbus
+    nimbus_release: 24.6.0_7d00786d
+    nimbus_version: v24.6.0
+
+  tasks:
+    - name: Install dependencies
+      include_role:
+        name: roles/dependencies
+        apply:
+          tags: always
+      tags:
+        - install_dependencies
+
+    - name: Install client binaries
+      include_role:
+        name: roles/clients-bin
+        apply:
+          tags: always
+      tags:
+        - build
+
+    - name: Install client services
+      include_role:
+        name: roles/clients-service
+        apply:
+          tags: always
+      tags:
+        - run

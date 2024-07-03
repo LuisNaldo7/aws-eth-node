@@ -1,0 +1,45 @@
+---
+- name: Setup nethermind service
+  block:
+    - name: Create nethermind service file
+      template:
+        src: nethermind.service.j2
+        dest: /etc/systemd/system/{{ service_name_nethermind }}.service
+        mode: '0644'
+
+    - name: Reload systemd to recognize the new service
+      command: systemctl daemon-reload
+      become: true
+
+    - name: Enable the service to start on boot
+      systemd:
+        name: "{{ service_name_nethermind }}"
+        enabled: yes
+
+    - name: Start the service
+      systemd:
+        name: "{{ service_name_nethermind }}"
+        state: started
+
+
+- name: Setup nimbus service
+  block:
+    - name: Create nimbus service file
+      template:
+        src: nimbus_bn.service.j2
+        dest: /etc/systemd/system/{{ service_name_nimbus }}.service
+        mode: '0644'
+
+    - name: Reload systemd to recognize the new service
+      command: systemctl daemon-reload
+      become: true
+
+    - name: Enable the service to start on boot
+      systemd:
+        name: "{{ service_name_nimbus }}"
+        enabled: yes
+
+    - name: Start the service
+      systemd:
+        name: "{{ service_name_nimbus }}"
+        state: started

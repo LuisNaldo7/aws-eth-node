@@ -1,0 +1,52 @@
+- name: Download Nethermind
+  get_url:
+    url: https://nethdev.blob.core.windows.net/builds/nethermind-{{ nethermind_release }}.zip
+    dest: /tmp/nethermind.zip 
+    mode: 0644
+  become: true
+
+- name: Extract Nethermind binary
+  ansible.builtin.unarchive:
+    src: /tmp/nethermind.zip
+    dest: /usr/local/bin
+    # include: nethermind
+    remote_src: true
+  become: true
+
+- name: Download Nimbus
+  get_url:
+    url: https://github.com/status-im/nimbus-eth2/releases/download/{{ nimbus_version }}/nimbus-eth2_Linux_amd64_{{ nimbus_release }}.tar.gz
+    dest: /tmp/nimbus.tar.gz
+    mode: 0644
+  become: true
+
+- name: Extract Nimbus binary
+  ansible.builtin.unarchive:
+    src: /tmp/nimbus.tar.gz
+    dest: /tmp/
+    remote_src: true
+    list_files: yes
+  register: nimbus_archive
+  become: true
+
+- name: Debug to show the list of files found
+  debug:
+    var: nimbus_archive.files
+
+- name: Copy Nimbus binary 
+  copy:
+    src: /tmp/{{ nimbus_archive.files[0] }}build/nimbus_beacon_node
+    dest: /usr/local/bin/nimbus
+    remote_src: true
+    mode: 0755
+  become: true
+
+- name: "Clean up /tmp directory"
+  ansible.builtin.file:
+    path: "/tmp/{{ item }}"
+    state: "absent"
+  loop:
+    - "nethermind.zip"
+    - "nimbus.tar.gz"
+    - "{{ nimbus_archive.files[0] }}"
+  become: true

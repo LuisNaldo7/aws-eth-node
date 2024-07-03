@@ -1,0 +1,15 @@
+[Unit]
+Description=Nethermind Ethereum Execution Client
+
+[Service]
+Type=simple
+User={{ service_user }}
+ExecStart={{ nethermind_binary_path }} \
+  --config {{ eth_network }} \
+  --datadir /home/ubuntu/nethermind \
+  --JsonRpc.Enabled={{ nethermind_enable_rpc }} \
+  --JsonRpc.EnabledModules={{ nethermind_rpc_modules }}
+Restart=always
+
+[Install]
+WantedBy=default.target
