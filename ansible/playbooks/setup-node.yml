@@ -3,39 +3,6 @@
   hosts: nodes
   become: true
 
-  vars:
-    clients:
-      nethermind:
-        # https://github.com/NethermindEth/nethermind/releases/
-        release_version: "1.26.0" # Upgrade -> 1.27.0
-        commit_hash: "0068729c" # Upgrade -> 220b5b85
-
-        enable_rpc: "true"
-        rpc_host: "0.0.0.0"
-        # modules: https://docs.nethermind.io/fundamentals/configuration#jsonrpc
-        rpc_modules: "eth,subscribe,trace,txpool,web3,personal,proof,net,parity,health,rpc" 
-
-        binary_path: /usr/local/bin/nethermind
-        data_dir: /home/ubuntu/nethermind
-
-      nimbus:
-        # https://github.com/status-im/nimbus-eth2/releases
-        release_version: "24.5.1" # Upgrade -> 24.6.0
-        commit_hash: "d2a07514" # Upgrade -> 7d00786d
-
-        binary_path: /usr/local/bin/nimbus
-        data_dir: /home/ubuntu/nimbus
-
-      general:
-        eth_network: holesky
-        jwt_directory_path: /keystore
-        jwt_filename: jwt
-
-    service:
-      user: ubuntu
-      servicename_execution_client: nethermind
-      servicename_beacon_client: nimbus_beacon
-
   tasks:
     - name: Setup jwt
       include_role:

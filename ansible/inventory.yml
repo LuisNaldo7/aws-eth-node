@@ -6,58 +6,35 @@ all:
 
   vars:
     ansible_ssh_private_key_file: $HOME/.ssh/id_rsa_aws_eth_node
-    # client versions; can be set via GitLab CICD variables for updating
-    heimdall_version: '1.0.5'
-    geth_version: '1.14.3-ab48ba42'
-    lighthouse_version: '5.1.3'
-    go_version: '1.22.2'
-    node_exporter_version: '1.8.1'
 
-    # whether to deploy backup or active secrets; set in GitLab CI
-    instance: null
+    clients:
+      nethermind:
+        # https://github.com/NethermindEth/nethermind/releases/
+        release_version: "1.26.0" # Upgrade -> 1.27.0
+        commit_hash: "0068729c" # Upgrade -> 220b5b85
 
-    # external IP address of the sentry machine to broadcast to the network for p2p
-    external_ip: null
+        enable_rpc: "true"
+        rpc_host: "0.0.0.0"
+        # modules: https://docs.nethermind.io/fundamentals/configuration#jsonrpc
+        rpc_modules: "eth,subscribe,trace,txpool,web3,personal,proof,net,parity,health,rpc" 
 
-    # internal IP of the Validator VM; set in GitLab CI
-    peer_ip: null
+        binary_path: /usr/local/bin/nethermind
+        data_dir: /home/ubuntu/nethermind
 
-    # which VM is being worked on
-    host: 'sentry'
+      nimbus:
+        # https://github.com/status-im/nimbus-eth2/releases
+        release_version: "24.5.1" # Upgrade -> 24.6.0
+        commit_hash: "d2a07514" # Upgrade -> 7d00786d
 
-    # Encrypted with `mkpasswd --method=sha-512`
-    # Keepass entry: https://kps.mms-at-work.de:10001/WebClient/Main?itemId=99d81c59-36d1-4d33-a6e0-c09dd9caa771
-    # yamllint disable-line rule:line-length
-    ubuntu_root_password: '$6$kXErDJ696IrsZVrN$45nQekfejAzih4s2gsUs9p.HbsN1OGQVPpL2lboOo2pv.wYvwdziO1oC7DfsXislRfA2HrilThleV4928MmCx0'
+        binary_path: /usr/local/bin/nimbus
+        data_dir: /home/ubuntu/nimbus
 
-    # volumes and mounts for the chain data of the different clients
-    volumes:
-      - device: '/dev/vdb'
-        mount_point: '/var/lib/heimdall'
-      - device: '/dev/vdc'
-        mount_point: '/mnt/ethereum'
+      general:
+        eth_network: holesky
+        jwt_directory_path: /keystore
+        jwt_filename: jwt
 
-    # service files additional flags:
-    heimdall_service_flags: []
-
-    # heimdall config values
-    heimdall_config:
-      # config.toml values
-      moniker: 'polygon-heimdall-sentry'
-      prof_laddr: 'localhost:6061'
-      p2p_laddr: 'tcp://0.0.0.0:26656'
-      external_address: 'tcp://{{ external_ip }}:26656'
-      # yamllint disable rule:line-length
-      seeds: '1500161dd491b67fb1ac81868952be49e2509c9f@52.78.36.216:26656,dd4a3f1750af5765266231b9d8ac764599921736@3.36.224.80:26656,8ea4f592ad6cc38d7532aff418d1fb97052463af@34.240.245.39:26656,e772e1fb8c3492a9570a377a5eafdb1dc53cd778@54.194.245.5:26656,6726b826df45ac8e9afb4bdb2469c7771bd797f1@52.209.21.164:26656'
-      # yamllint enable rule:line-length
-      addr_book_strict: 'true'
-      max_num_inbound_peers: '75'
-      max_num_outbound_peers: '75'
-      pex: 'true'
-      persistent_peers: ''
-      private_peer_ids: '{{ VALIDATOR_HEIMDALL_PEER_ID }}'
-      max_open_connections: '100'
-
-      # heimdall-config.toml values
-      eth_rpc_url: 'http://localhost:8545'
-      bor_rpc_url: 'http://{{ peer_ip }}:8545'
+    service:
+      user: ubuntu
+      servicename_execution_client: nethermind
+      servicename_beacon_client: nimbus_beacon
