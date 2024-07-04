@@ -31,7 +31,7 @@
     file:
       src: "/usr/local/nethermind/nethermind"
       dest: "{{ clients.nethermind.binary_path }}"
-      mode: 0644
+      mode: 0755
       state: link
 
   - name: "Clean up /tmp directory"
@@ -60,6 +60,12 @@
       systemd:
         name: "{{ service.servicename_execution_client }}"
         enabled: yes
+
+    - name: "Check if nethermind is running"
+      systemd_service:
+        name: "{{ service.servicename_execution_client }}"
+      register: "nethermind_service_status"
+      # failed_when: false
 
     - name: Start the service
       systemd:
