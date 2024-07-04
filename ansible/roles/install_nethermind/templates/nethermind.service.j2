@@ -1,0 +1,17 @@
+[Unit]
+Description=Nethermind Ethereum Execution Client
+
+[Service]
+Type=simple
+User={{ service.user }}
+ExecStart={{ clients.nethermind.binary_path }} \
+  --config {{ clients.general.eth_network }} \
+  --datadir {{ clients.nethermind.data_dir }} \
+  --JsonRpc.Enabled={{ clients.nethermind.enable_rpc }} \
+  --JsonRpc.Host={{ clients.nethermind.rpc_host }} \
+  --JsonRpc.EnabledModules={{ clients.nethermind.rpc_modules }} \
+  --JsonRpc.JwtSecretFile="{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}"
+Restart=always
+
+[Install]
+WantedBy=default.target

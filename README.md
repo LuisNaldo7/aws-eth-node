@@ -48,10 +48,57 @@ _Switch to directory `/terraform`._
 
 _Switch to directory `/ansible`._
 
-1. Update hosts in `hosts.ini` with outputs from `terraform apply` command.
+1. Update hosts in `inventory.yml` with outputs from `terraform apply` command.
 
 1. Rollout clients
 
    ```bash
-   ansible-playbook -i hosts.ini install_nginx.yml
+   ansible-playbook -i inventory.yml playbooks/setup-node.yml
+   ```
+
+## Check Setup
+
+Set environment variables
+
+_Replace `public_host_ip` with host to be checked._
+
+```bash
+export host=public_host_ip
+export rpc_port=8545
+```
+
+### Check Node via RPC
+
+_Execute from any host_
+
+- Node health
+
+   ```bash
+   curl -I $host:$rpc_port/health
+   ```
+
+- Synching status
+
+   ```bash
+   curl -X POST --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' $host:$rpc_port
+   ```
+
+### Check Service Logs
+
+Log into vm
+
+   ```bash
+   ssh ubuntu@$host
+   ```
+
+- Check Nethermind logs
+
+   ```bash
+   journalctl -u nethermind.service -n 100 --no-pager -f
+   ```
+
+- Check Nimbus logs
+
+   ```bash
+   journalctl -u nimbus_beacon.service -n 100 --no-pager -f
    ```

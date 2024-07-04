@@ -1,0 +1,73 @@
+- name: Install Nethermind binary
+  block:
+  - name: Download Nethermind
+    get_url:
+      url: https://github.com/NethermindEth/nethermind/releases/download/{{ clients.nethermind.release_version }}/nethermind-{{ clients.nethermind.release_version }}-{{ clients.nethermind.commit_hash }}-linux-x64.zip
+      dest: /tmp/nethermind.zip 
+      mode: 0644
+    become: true
+
+  - name: "Check if Nethermind directory exists"
+    stat:
+      path: "/usr/local/nethermind"
+    register: "client_dir"
+
+  - name: "Create Nethermind directory directory"
+    file:
+      path: "/usr/local/nethermind"
+      state: "directory"
+      mode: "0755"
+    when: "not client_dir.stat.exists"
+    become: true
+
+  - name: Extract Nethermind binary
+    unarchive:
+      src: /tmp/nethermind.zip
+      dest: /usr/local/nethermind
+      remote_src: true
+    become: true
+
+  - name: Create symbolic link 
+    file:
+      src: "/usr/local/nethermind/nethermind"
+      dest: "{{ clients.nethermind.binary_path }}"
+      mode: 0755
+      state: link
+
+  - name: "Clean up /tmp directory"
+    file:
+      path: "/tmp/{{ item }}"
+      state: "absent"
+    loop:
+      - "nethermind.zip"
+    become: true
+
+- name: Setup nethermind service
+  block:
+    - name: Create nethermind service file
+      template:
+        src: nethermind.service.j2
+        dest: /etc/systemd/system/{{ service.servicename_execution_client }}.service
+        mode: '0644'
+
+    - name: Reload systemd to recognize the new service
+      systemd:
+        name: "{{ service.servicename_execution_client }}"
+        daemon_reload: true
+      become: true
+
+    - name: Enable the service to start on boot
+      systemd:
+        name: "{{ service.servicename_execution_client }}"
+        enabled: yes
+
+    - name: "Check if nethermind is running"
+      systemd_service:
+        name: "{{ service.servicename_execution_client }}"
+      register: "nethermind_service_status"
+      # failed_when: false
+
+    - name: Start the service
+      systemd:
+        name: "{{ service.servicename_execution_client }}"
+        state: started

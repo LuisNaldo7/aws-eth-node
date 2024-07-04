@@ -1,0 +1,30 @@
+---
+- name: Setup Node
+  hosts: nodes
+  become: true
+
+  tasks:
+    - name: Setup jwt
+      include_role:
+        name: roles/setup_jwt
+        apply:
+          tags: always
+      tags:
+        - setup
+        - jwt
+
+    - name: Install nethermind 
+      include_role:
+        name: roles/install_nethermind
+        apply:
+          tags: always
+      tags:
+        - install
+
+    - name: Install nimbus
+      include_role:
+        name: roles/install_nimbus
+        apply:
+          tags: always
+      tags:
+        - install

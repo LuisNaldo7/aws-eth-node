@@ -1,19 +1,20 @@
-variable "instance_name_execution_client" {
+variable "instance_name_eth_node" {
   description = "Name for the EC2 instance"
   type        = string
-  default     = "ETH Execution Client"
+  default     = "Ethereum Node"
 }
 
 variable "instance_ami" {
   description = "The instance type to use"
-  default     = "ami-01e444924a2233b07" # Ubuntu 24.04 LTS
+  # default     = "ami-0e872aee57663ae2d" # Ubuntu 22.04 LTS
+  default     =  "ami-01e444924a2233b07" # Ubuntu 24.04 LTS
 }
 
 variable "instance_type" {
   # https://aws.amazon.com/de/ec2/instance-types/
   description = "The instance type to use"
-  # m7g.xlarge
-  default     = "t2.micro" # 4 vCPU, 16gb RAM
+  # t2.micro for development
+  default     = "t3.xlarge" # Xeon, 4 vCPU, 16gb RAM
 }
 
 variable "volume_type" {
@@ -24,8 +25,7 @@ variable "volume_type" {
 
 variable "volume_size" {
   description = "Storage size for client data"
-  # 200
-  default     = "20"
+  default     = "200"
 }
 
 variable "key_name" {
