@@ -41,7 +41,7 @@
   block:
     - name: Create nimbus service file
       template:
-        src: nimbus_bn.service.j2
+        src: nimbus_beacon.service.j2
         dest: /etc/systemd/system/{{ service.servicename_beacon_client }}.service
         mode: '0644'
 
