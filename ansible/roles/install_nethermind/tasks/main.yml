@@ -34,42 +34,34 @@
       mode: 0644
       state: link
 
-- name: Install Nimbus binary
+  - name: "Clean up /tmp directory"
+    file:
+      path: "/tmp/{{ item }}"
+      state: "absent"
+    loop:
+      - "nethermind.zip"
+    become: true
+
+- name: Setup nethermind service
   block:
-  - name: Download Nimbus
-    get_url:
-      url: https://github.com/status-im/nimbus-eth2/releases/download/v{{ clients.nimbus.release_version }}/nimbus-eth2_Linux_amd64_{{ clients.nimbus.release_version }}_{{ clients.nimbus.commit_hash }}.tar.gz
-      dest: /tmp/nimbus.tar.gz
-      mode: 0644
-    become: true
+    - name: Create nethermind service file
+      template:
+        src: nethermind.service.j2
+        dest: /etc/systemd/system/{{ service.servicename_execution_client }}.service
+        mode: '0644'
 
-  - name: Extract Nimbus binary
-    unarchive:
-      src: /tmp/nimbus.tar.gz
-      dest: /tmp/
-      remote_src: true
-      list_files: yes
-    register: nimbus_archive
-    become: true
+    - name: Reload systemd to recognize the new service
+      systemd:
+        name: "{{ service.servicename_execution_client }}"
+        daemon_reload: true
+      become: true
 
-  - name: Debug to show the list of files found
-    debug:
-      var: nimbus_archive.files
+    - name: Enable the service to start on boot
+      systemd:
+        name: "{{ service.servicename_execution_client }}"
+        enabled: yes
 
-  - name: Copy Nimbus binary
-    copy:
-      src: /tmp/{{ nimbus_archive.files[0] }}build/nimbus_beacon_node
-      dest: /usr/local/bin/nimbus
-      remote_src: true
-      mode: 0755
-    become: true
-
-- name: "Clean up /tmp directory"
-  file:
-    path: "/tmp/{{ item }}"
-    state: "absent"
-  loop:
-    - "nethermind.zip"
-    - "nimbus.tar.gz"
-    - "{{ nimbus_archive.files[0] }}"
-  become: true
+    - name: Start the service
+      systemd:
+        name: "{{ service.servicename_execution_client }}"
+        state: started

@@ -46,18 +46,18 @@
         - setup
         - jwt
 
-    - name: Install client binaries
+    - name: Install nethermind 
       include_role:
-        name: roles/setup_clients_bin
+        name: roles/install_nethermind
         apply:
           tags: always
       tags:
-        - build
+        - install
 
-    - name: Install client services
+    - name: Install nimbus
       include_role:
-        name: roles/setup_clients_service
+        name: roles/install_nimbus
         apply:
           tags: always
       tags:
-        - run
+        - install
