@@ -1,23 +1,56 @@
-- name: Install Nethermind binary
+- name: Check Nethermind version
   block:
-  - name: Download Nethermind
+  - name: "Check for client version"
+    command: "nethermind --version"
+    register: "version_query"
+    failed_when: false
+    changed_when: false
+
+  - name: "Extract Nethermind version"
+    set_fact:
+      nethermind_current_version: "{{ version_query.stdout | regex_search('(\\d+\\.\\d+\\.\\d+)') }}"
+
+  - name: "Nethermind version installed"
+    debug:
+      var: nethermind_current_version
+      
+  - name: "Nethermind version wanted"
+    debug:
+      var: clients.nethermind.release_version
+
+- name: "Check if Nethermind service is running"
+  systemd_service:
+    name: "{{ service.servicename_execution_client }}"
+  register: "service_status"
+  failed_when: false
+
+- name: "Stop Nethermind service if running and new version wanted"
+  when: "service_status.status is defined and service_status.status.ActiveState == \"active\" and nethermind_current_version not in clients.nethermind.release_version"
+  systemd_service:
+    name: "{{ service.servicename_execution_client }}"
+    state: "stopped"
+  become: true
+
+- name: Install Nethermind
+  when: "nethermind_current_version == \"\" or nethermind_current_version not in clients.nethermind.release_version"
+  block:
+  - name: Download Nethermind archive
     get_url:
       url: https://github.com/NethermindEth/nethermind/releases/download/{{ clients.nethermind.release_version }}/nethermind-{{ clients.nethermind.release_version }}-{{ clients.nethermind.commit_hash }}-linux-x64.zip
       dest: /tmp/nethermind.zip 
       mode: 0644
     become: true
 
-  - name: "Check if Nethermind directory exists"
-    stat:
-      path: "/usr/local/nethermind"
-    register: "client_dir"
+  - name: Delete existing Nethermind client files
+    file:
+      state: absent
+      path: /usr/local/nethermind
 
   - name: "Create Nethermind directory directory"
     file:
       path: "/usr/local/nethermind"
       state: "directory"
       mode: "0755"
-    when: "not client_dir.stat.exists"
     become: true
 
   - name: Extract Nethermind binary
@@ -42,9 +75,10 @@
       - "nethermind.zip"
     become: true
 
-- name: Setup nethermind service
+- name: Setup Nethermind service
+  when: "nethermind_current_version == \"\" or nethermind_current_version not in clients.nethermind.release_version"
   block:
-    - name: Create nethermind service file
+    - name: Create service file
       template:
         src: nethermind.service.j2
         dest: /etc/systemd/system/{{ service.servicename_execution_client }}.service
@@ -61,13 +95,9 @@
         name: "{{ service.servicename_execution_client }}"
         enabled: yes
 
-    - name: "Check if nethermind is running"
+    - name: "Start service"
       systemd_service:
         name: "{{ service.servicename_execution_client }}"
-      register: "nethermind_service_status"
-      # failed_when: false
-
-    - name: Start the service
-      systemd:
-        name: "{{ service.servicename_execution_client }}"
-        state: started
+        state: "started"
+      become: true
+     

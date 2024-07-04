@@ -7,7 +7,8 @@ User={{ service.user }}
 ExecStart={{ clients.nimbus.binary_path }} \
   --network={{ clients.general.eth_network }} \
   --data-dir={{ clients.nimbus.data_dir }} \
-  --jwt-secret="{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}"
+  --jwt-secret="{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}" \
+  --graffiti="{{ clients.nimbus.graffiti }}"
 Restart=always
 
 [Install]

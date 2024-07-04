@@ -1,0 +1,23 @@
+---
+- name: Update Clients
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install nethermind 
+      include_role:
+        name: roles/install_nethermind
+        apply:
+          tags: always
+      tags:
+        - install
+        - nethermind
+
+    - name: Install nimbus
+      include_role:
+        name: roles/install_nimbus
+        apply:
+          tags: always
+      tags:
+        - install
+        - nimbus

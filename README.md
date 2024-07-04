@@ -6,6 +6,8 @@
 
 - [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 
+- [AWS Account](https://eu-central-1.console.aws.amazon.com/console/home)
+
 ## Setup
 
 1. Generate SSH key pair
@@ -48,9 +50,9 @@ _Switch to directory `/terraform`._
 
 _Switch to directory `/ansible`._
 
-1. Update hosts in `inventory.yml` with outputs from `terraform apply` command.
+1. Update hosts IPs in [inventory.yml](ansible/inventory.yml) with outputs from `terraform apply` command.
 
-1. Rollout clients
+1. Rollout and configure full node using playbook `setup-node.yml`
 
    ```bash
    ansible-playbook -i inventory.yml playbooks/setup-node.yml
@@ -102,3 +104,21 @@ Log into vm
    ```bash
    journalctl -u nimbus_beacon.service -n 100 --no-pager -f
    ```
+
+## Client Updates
+
+_Switch to directory `/ansible`. Playbook `setup-node.yml` must have been executed at least once before proceeding!_ 
+
+1. Open [inventory.yml](ansible/inventory.yml) and update both variables `release_version` and the 8 digit `commit_hash` of the respective client to update. You'll find example values as comments.
+
+1. Update clients using playbook `update-clients.yml`. If a client's `release_version` is unchanged the update procedure will be skipped.
+
+   ```bash
+   ansible-playbook -i inventory.yml playbooks/update-clients.yml
+   ```
+
+## Open Tasks
+
+- secure default user
+- run clients with unprivileged user
+- automate updating host ips after `terraform apply`
