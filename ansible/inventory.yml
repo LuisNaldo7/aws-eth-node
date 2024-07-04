@@ -10,8 +10,8 @@ all:
     clients:
       nethermind:
         # https://github.com/NethermindEth/nethermind/releases/
-        release_version: "1.26.0" # Upgrade -> 1.27.0
-        commit_hash: "0068729c" # Upgrade -> 220b5b85
+        release_version: "1.26.0" # Upgrade: 1.26.0   -> 1.27.0
+        commit_hash: "0068729c"   # Upgrade: 0068729c -> 220b5b85
 
         enable_rpc: "true"
         rpc_host: "0.0.0.0"
@@ -23,8 +23,8 @@ all:
 
       nimbus:
         # https://github.com/status-im/nimbus-eth2/releases
-        release_version: "24.5.1" # Upgrade -> 24.6.0
-        commit_hash: "d2a07514" # Upgrade -> 7d00786d
+        release_version: "24.5.1" # Upgrade: 24.5.1   -> 24.6.0
+        commit_hash: "d2a07514"   # Upgrade: d2a07514 -> 7d00786d
 
         binary_path: /usr/local/bin/nimbus
         data_dir: /home/ubuntu/nimbus
