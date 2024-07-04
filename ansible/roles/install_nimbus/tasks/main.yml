@@ -1,4 +1,38 @@
+- name: Check Nimbus version
+  block:
+  - name: "Check for client version"
+    command: "nimbus --version"
+    register: "version_query"
+    failed_when: false
+    changed_when: false
+
+  - name: "Extract Nimbus version"
+    set_fact:
+      nimbus_current_version: "{{ version_query.stdout | regex_search('(\\d+\\.\\d+\\.\\d+)') }}"
+
+  - name: "Nimbus version installed"
+    debug:
+      var: nimbus_current_version
+      
+  - name: "Nimbus version wanted"
+    debug:
+      var: clients.nimbus.release_version
+
+- name: "Check if Nimbus service is running"
+  systemd_service:
+    name: "{{ service.servicename_beacon_client }}"
+  register: "service_status"
+  failed_when: false
+
+- name: "Stop Nimbus service if running and new version wanted"
+  when: "service_status.status is defined and service_status.status.ActiveState == \"active\" and nimbus_current_version not in clients.nimbus.release_version"
+  systemd_service:
+    name: "{{ service.servicename_beacon_client }}"
+    state: "stopped"
+  become: true
+
 - name: Install Nimbus
+  when: "nimbus_current_version == \"\" or nimbus_current_version not in clients.nimbus.release_version"
   block:
   - name: Download Nimbus archive
     get_url:
@@ -16,7 +50,7 @@
     register: nimbus_archive
     become: true
 
-  - name: Debug to show the list of files found
+  - name: Show the list of files found
     debug:
       var: nimbus_archive.files
 
@@ -37,9 +71,10 @@
       - "{{ nimbus_archive.files[0] }}"
     become: true
 
-- name: Setup nimbus service
+- name: Setup Nimbus service
+  when: "nimbus_current_version == \"\" or nimbus_current_version not in clients.nimbus.release_version"
   block:
-    - name: Create nimbus service file
+    - name: Create service file
       template:
         src: nimbus_beacon.service.j2
         dest: /etc/systemd/system/{{ service.servicename_beacon_client }}.service
@@ -56,7 +91,8 @@
         name: "{{ service.servicename_beacon_client }}"
         enabled: yes
 
-    - name: Start the service
-      systemd:
+    - name: Start service
+      systemd_service:
         name: "{{ service.servicename_beacon_client }}"
         state: started
+      become: true

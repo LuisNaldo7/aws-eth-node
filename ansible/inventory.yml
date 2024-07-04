@@ -1,11 +1,11 @@
 all:
   hosts:
     node1:
-      ansible_host: 3.125.156.153
+      ansible_host: 3.66.217.171 # update this from terraform apply output ( instance_public_ip[0] )
       ansible_user: ubuntu
 
     node2:
-      ansible_host: 18.153.104.58
+      ansible_host: 3.66.211.77 # update this from terraform apply output ( instance_public_ip[1] )
       ansible_user: ubuntu
 
   vars:
@@ -29,6 +29,8 @@ all:
         # https://github.com/status-im/nimbus-eth2/releases
         release_version: "24.5.1" # Upgrade: 24.5.1   -> 24.6.0
         commit_hash: "d2a07514"   # Upgrade: d2a07514 -> 7d00786d
+
+        graffiti: "firenze likes that"
 
         binary_path: /usr/local/bin/nimbus
         data_dir: /home/ubuntu/nimbus
