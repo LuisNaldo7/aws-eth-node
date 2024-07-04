@@ -7,13 +7,32 @@
       mode: 0644
     become: true
 
+  - name: "Check if Nethermind directory exists"
+    stat:
+      path: "/usr/local/nethermind"
+    register: "client_dir"
+
+  - name: "Create Nethermind directory directory"
+    file:
+      path: "/usr/local/nethermind"
+      state: "directory"
+      mode: "0755"
+    when: "not client_dir.stat.exists"
+    become: true
+
   - name: Extract Nethermind binary
     unarchive:
       src: /tmp/nethermind.zip
-      dest: /usr/local/bin
-      # include: nethermind
+      dest: /usr/local/nethermind
       remote_src: true
     become: true
+
+  - name: Create symbolic link 
+    file:
+      src: "/usr/local/nethermind/nethermind"
+      dest: "{{ clients.nethermind.binary_path }}"
+      mode: 0644
+      state: link
 
 - name: Install Nimbus binary
   block:
