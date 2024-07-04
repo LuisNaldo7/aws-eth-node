@@ -9,6 +9,7 @@
     path: "{{ clients.general.jwt_directory_path }}"
     state: "directory"
     mode: "0755"
+    owner: "{{ service.user }}"
   when: "not jwt_dir.stat.exists"
   become: true
 
@@ -22,6 +23,7 @@
     dest: "{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}"
     content: "{{ query('community.general.random_string', length=64, override_all=hex_chars) | first }}"
     mode: "0640"
+    owner: "{{ service.user }}"
   vars:
     hex_chars: "0123456789ABCDEF"
   when: "not jwtsecret_exists.stat.exists"
