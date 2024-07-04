@@ -1,0 +1,14 @@
+[Unit]
+Description=Nimbus Ethereum Consensus Client
+
+[Service]
+Type=simple
+User={{ service.user }}
+ExecStart={{ clients.nimbus.binary_path }} \
+  --network={{ clients.general.eth_network }} \
+  --data-dir={{ clients.nimbus.data_dir }} \
+  --jwt-secret="{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}"
+Restart=always
+
+[Install]
+WantedBy=default.target

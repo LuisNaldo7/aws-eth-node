@@ -1,43 +1,54 @@
 ---
-- name: Setup Node environment
+- name: Setup Node
   hosts: nodes
   become: true
 
   vars:
-    
-    # service
-    service_user: ubuntu
-    # service_group: mygroup
-    service_name_nethermind: nethermind
-    service_name_nimbus: nimbus_bn
+    clients:
+      nethermind:
+        # https://github.com/NethermindEth/nethermind/releases/
+        release_version: "1.26.0" # Upgrade -> 1.27.0
+        commit_hash: "0068729c" # Upgrade -> 220b5b85
 
-    eth_network: holesky
-    jwt_path: /jwt
-    
+        enable_rpc: "true"
+        rpc_host: "0.0.0.0"
+        # modules: https://docs.nethermind.io/fundamentals/configuration#jsonrpc
+        rpc_modules: "eth,subscribe,trace,txpool,web3,personal,proof,net,parity,health,rpc" 
 
-    # nethermind
-    nethermind_binary_path: /usr/local/bin/nethermind
-    nethermind_release: 1.27.0-220b5b85-linux-x64
-    nethermind_enable_rpc: "true"
-    nethermind_rpc_modules: "eth,net"
+        binary_path: /usr/local/bin/nethermind
+        data_dir: /home/ubuntu/nethermind
 
-    # nimbus
-    nimbus_binary_path: /usr/local/bin/nimbus
-    nimbus_release: 24.6.0_7d00786d
-    nimbus_version: v24.6.0
+      nimbus:
+        # https://github.com/status-im/nimbus-eth2/releases
+        release_version: "24.5.1" # Upgrade -> 24.6.0
+        commit_hash: "d2a07514" # Upgrade -> 7d00786d
+
+        binary_path: /usr/local/bin/nimbus
+        data_dir: /home/ubuntu/nimbus
+
+      general:
+        eth_network: holesky
+        jwt_directory_path: /keystore
+        jwt_filename: jwt
+
+    service:
+      user: ubuntu
+      servicename_execution_client: nethermind
+      servicename_beacon_client: nimbus_beacon
 
   tasks:
-    - name: Install dependencies
+    - name: Setup jwt
       include_role:
-        name: roles/dependencies
+        name: roles/setup_jwt
         apply:
           tags: always
       tags:
-        - install_dependencies
+        - setup
+        - jwt
 
     - name: Install client binaries
       include_role:
-        name: roles/clients-bin
+        name: roles/setup_clients_bin
         apply:
           tags: always
       tags:
@@ -45,7 +56,7 @@
 
     - name: Install client services
       include_role:
-        name: roles/clients-service
+        name: roles/setup_clients_service
         apply:
           tags: always
       tags:

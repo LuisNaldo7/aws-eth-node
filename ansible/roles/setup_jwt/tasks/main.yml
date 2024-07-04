@@ -1,0 +1,28 @@
+---
+- name: "Check if jwtsecret directory exists"
+  stat:
+    path: "{{ clients.general.jwt_directory_path }}"
+  register: "jwt_dir"
+
+- name: "Create jwtsecret directory"
+  file:
+    path: "{{ clients.general.jwt_directory_path }}"
+    state: "directory"
+    mode: "0755"
+  when: "not jwt_dir.stat.exists"
+  become: true
+
+- name: "Check if JWT secret exists"
+  stat:
+    path: "{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}"
+  register: "jwtsecret_exists"
+
+- name: "Generate JWT secret"
+  copy:
+    dest: "{{ clients.general.jwt_directory_path }}/{{ clients.general.jwt_filename }}"
+    content: "{{ query('community.general.random_string', length=64, override_all=hex_chars) | first }}"
+    mode: "0640"
+  vars:
+    hex_chars: "0123456789ABCDEF"
+  when: "not jwtsecret_exists.stat.exists"
+  become: true

@@ -1,0 +1,56 @@
+- name: Install Nethermind binary
+  block:
+  - name: Download Nethermind
+    get_url:
+      url: https://github.com/NethermindEth/nethermind/releases/download/{{ clients.nethermind.release_version }}/nethermind-{{ clients.nethermind.release_version }}-{{ clients.nethermind.commit_hash }}-linux-x64.zip
+      dest: /tmp/nethermind.zip 
+      mode: 0644
+    become: true
+
+  - name: Extract Nethermind binary
+    unarchive:
+      src: /tmp/nethermind.zip
+      dest: /usr/local/bin
+      # include: nethermind
+      remote_src: true
+    become: true
+
+- name: Install Nimbus binary
+  block:
+  - name: Download Nimbus
+    get_url:
+      url: https://github.com/status-im/nimbus-eth2/releases/download/v{{ clients.nimbus.release_version }}/nimbus-eth2_Linux_amd64_{{ clients.nimbus.release_version }}_{{ clients.nimbus.commit_hash }}.tar.gz
+      dest: /tmp/nimbus.tar.gz
+      mode: 0644
+    become: true
+
+  - name: Extract Nimbus binary
+    unarchive:
+      src: /tmp/nimbus.tar.gz
+      dest: /tmp/
+      remote_src: true
+      list_files: yes
+    register: nimbus_archive
+    become: true
+
+  - name: Debug to show the list of files found
+    debug:
+      var: nimbus_archive.files
+
+  - name: Copy Nimbus binary
+    copy:
+      src: /tmp/{{ nimbus_archive.files[0] }}build/nimbus_beacon_node
+      dest: /usr/local/bin/nimbus
+      remote_src: true
+      mode: 0755
+    become: true
+
+- name: "Clean up /tmp directory"
+  file:
+    path: "/tmp/{{ item }}"
+    state: "absent"
+  loop:
+    - "nethermind.zip"
+    - "nimbus.tar.gz"
+    - "{{ nimbus_archive.files[0] }}"
+  become: true
