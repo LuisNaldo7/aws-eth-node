@@ -1,30 +1,33 @@
+variable "num_instances" {
+  description = "The amount of instances to spin up"
+  default     =  2
+}
+
 variable "instance_name_eth_node" {
   description = "Name for the EC2 instance"
   type        = string
-  default     = "Ethereum Node"
+  default     = "Ethereum Full Node"
 }
 
 variable "instance_ami" {
   description = "The instance type to use"
-  # default     = "ami-0e872aee57663ae2d" # Ubuntu 22.04 LTS
   default     =  "ami-01e444924a2233b07" # Ubuntu 24.04 LTS
 }
 
 variable "instance_type" {
   # https://aws.amazon.com/de/ec2/instance-types/
   description = "The instance type to use"
-  # t2.micro for development
-  default     = "t3.xlarge" # Xeon, 4 vCPU, 16gb RAM
+  default     = "t3.xlarge" # Xeon,4 vCPU,16gb RAM
 }
 
 variable "volume_type" {
   # https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html
-  description = "Storage type for client data"
+  description = "Storage type"
   default     = "gp2" # SSD 250 MiB/s
 }
 
 variable "volume_size" {
-  description = "Storage size for client data"
+  description = "Storage size in GiB"
   default     = "200"
 }
 

@@ -1,4 +1,5 @@
 resource "aws_instance" "eth_node_ec2" {
+  count         = var.num_instances 
   ami           = var.instance_ami 
   instance_type = var.instance_type
   key_name      = aws_key_pair.ssh_keypair.key_name
@@ -17,7 +18,7 @@ resource "aws_instance" "eth_node_ec2" {
   }
 
   tags = {
-    Name = var.instance_name_eth_node
+    Name = "${var.instance_name_eth_node} ${count.index + 1}"
   }
 }
 
